@@ -1,4 +1,4 @@
-A tool to convert svg to png. It can run up to 64 parallel convertion processes
+A tool to convert svg to png. It can run up to 64 parallel convertion processes.
 Uses imagemagick as backend.
 
 #Licence

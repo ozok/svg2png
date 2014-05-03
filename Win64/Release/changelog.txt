@@ -1,0 +1,6 @@
+--1.1.x
+-Added: Program will save backend logs to text files
+-Fixed: Stopping didn't stop progress timer
+
+--1.0.73
+-First release

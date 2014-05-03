@@ -345,6 +345,14 @@ object MainForm: TMainForm
       Caption = 'Imagemagick Help'
       OnClick = I1Click
     end
+    object C1: TMenuItem
+      Caption = 'Change log'
+      OnClick = C1Click
+    end
+    object S1: TMenuItem
+      Caption = 'See logs'
+      OnClick = S1Click
+    end
     object A4: TMenuItem
       Caption = 'About'
       OnClick = A4Click

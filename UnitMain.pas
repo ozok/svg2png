@@ -70,6 +70,8 @@ type
     ProcessEdit: TJvSpinEdit;
     UpdateThread: TJvThread;
     UpdateDownloader: TJvHttpUrlGrabber;
+    S1: TMenuItem;
+    C1: TMenuItem;
     procedure AddBtnClick(Sender: TObject);
     procedure StartBtnClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -92,6 +94,8 @@ type
     procedure A4Click(Sender: TObject);
     procedure UpdateThreadExecute(Sender: TObject; Params: Pointer);
     procedure UpdateDownloaderDoneStream(Sender: TObject; Stream: TStream; StreamSize: Integer; Url: string);
+    procedure S1Click(Sender: TObject);
+    procedure C1Click(Sender: TObject);
   private
     { Private declarations }
     FAppData: string;
@@ -105,6 +109,8 @@ type
 
     procedure NormalState;
     procedure ProgressState;
+
+    procedure SaveLogs();
   public
     { Public declarations }
   end;
@@ -230,9 +236,15 @@ begin
   AddMenu.Popup(P.X, P.Y + AddBtn.Height)
 end;
 
+procedure TMainForm.C1Click(Sender: TObject);
+begin
+  shellexecute(Handle, 'open', PWideChar(IncludeTrailingPathDelimiter(ExtractFileDir(Application.ExeName)) + '\changelog.txt'), nil, nil, SW_SHOWNORMAL);
+end;
+
 procedure TMainForm.ClearBtnClick(Sender: TObject);
 begin
-  if FileList.Items.Count = 0 then Exit;
+  if FileList.Items.Count = 0 then
+    Exit;
 
   if ID_YES = Application.MessageBox('Remove all from file list?', 'Remove All', MB_ICONQUESTION or MB_YESNO) then
   begin
@@ -423,12 +435,16 @@ begin
   if LDoneCount = FTotalCmd then
   begin
     PosTimer.Enabled := False;
+    WaitPanel.Visible := True;
+    WaitPanel.BringToFront;
+    try
+      SaveLogs;
+    finally
+      WaitPanel.Visible := False;
+    end;
     NormalState;
-    // for I := Low(FConverters) to High(FConverters) do
-    // begin
-    // FConverters[i].CommandLines.SaveToFile(ExtractFileDir(Application.ExeName) + '\' + FloatToStr(i) + 'cmd.txt', TEncoding.UTF8);
-    // FConverters[i].GetConsoleOutput.SaveToFile(ExtractFileDir(Application.ExeName) + '\' + FloatToStr(i) + 'console.txt', TEncoding.UTF8);
-    // end;
+    Self.BringToFront;
+    Application.MessageBox('Finished converting.', 'Done', MB_ICONINFORMATION);
   end
   else
   begin
@@ -459,6 +475,58 @@ end;
 procedure TMainForm.RemoveBtnClick(Sender: TObject);
 begin
   FileList.DeleteSelected;
+end;
+
+procedure TMainForm.S1Click(Sender: TObject);
+begin
+  if DirectoryExists(FAppData) then
+  begin
+    shellexecute(Handle, 'open', 'explorer', PWideChar(FAppData), nil, SW_SHOWNORMAL);
+  end;
+end;
+
+procedure TMainForm.SaveLogs;
+var
+  I: Integer;
+  LStreamWriter: TStreamWriter;
+  J: Integer;
+begin
+  for I := Low(FConverters) to High(FConverters) do
+  begin
+    Application.ProcessMessages;
+    // save console outputs
+    if FConverters[i].GetConsoleOutput.Count > 0 then
+    begin
+      LStreamWriter := TStreamWriter.Create(FAppData + '\log' + FloatToStr(i + 1) + '.txt', False, TENcoding.UTF8);
+      try
+        LStreamWriter.WriteLine(DateTimeToStr(Now));
+        for J := 0 to FConverters[i].GetConsoleOutput.Count-1 do
+        begin
+          Application.ProcessMessages;
+          LStreamWriter.WriteLine(FConverters[i].GetConsoleOutput[j]);
+        end;
+      finally
+        LStreamWriter.Close;
+        LStreamWriter.Free;
+      end;
+    end;
+    // save commandlines
+    if FConverters[i].CommandLines.Count > 0 then
+    begin
+      LStreamWriter := TStreamWriter.Create(FAppData + '\cmd' + FloatToStr(i + 1) + '.txt', False, TENcoding.UTF8);
+      LStreamWriter.WriteLine(DateTimeToStr(Now));
+      try
+        for J := 0 to FConverters[i].CommandLines.Count-1 do
+        begin
+          Application.ProcessMessages;
+          LStreamWriter.WriteLine(FConverters[i].CommandLines[j]);
+        end;
+      finally
+        LStreamWriter.Close;
+        LStreamWriter.Free;
+      end;
+    end;
+  end;
 end;
 
 procedure TMainForm.SaveSettings;
@@ -509,7 +577,7 @@ begin
       if not CreateDir(OutputDirectory.Text) then
       begin
         Application.MessageBox('Cannot create output folder.', 'Error', MB_ICONERROR);
-        exit;
+        Exit;
       end;
     end;
 
@@ -594,6 +662,14 @@ begin
   begin
     for I := Low(FConverters) to High(FConverters) do
       FConverters[i].Stop;
+    PosTimer.Enabled := False;
+    WaitPanel.Visible := True;
+    WaitPanel.BringToFront;
+    try
+      SaveLogs;
+    finally
+      WaitPanel.Visible := False;
+    end;
     NormalState;
   end;
 end;
