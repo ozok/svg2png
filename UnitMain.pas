@@ -1,5 +1,5 @@
 { *
-  * Copyright (C) 2012-2013 ozok <ozok26@gmail.com>
+  * Copyright (C) 2014 ozok <ozok26@gmail.com>
   *
   * This file is part of SVG2PNG.
   *
@@ -116,7 +116,7 @@ type
   end;
 
 const
-  BuildInt = 73;
+  BuildInt = 81;
 
 var
   MainForm: TMainForm;
@@ -629,7 +629,7 @@ begin
         LCurrProcess := i mod LProcessCount;
         with FConverters[LCurrProcess] do
         begin
-          CommandLines.Add(' ' + ExtraEdit.Text + ' -density ' + DensityEdit.Text + ' -resize ' + WidthEdit.Text + 'x' + HeightEdit.Text + ' -background none -antialias "' + FileList.Items[i] + '" "'
+          CommandLines.Add(' ' + ExtraEdit.Text + ' -limit memory 512MB -density ' + DensityEdit.Text + ' -resize ' + WidthEdit.Text + 'x' + HeightEdit.Text + ' -background none -antialias "' + FileList.Items[i] + '" "'
             + LOutputFile + '"');
           Paths.Add(FImageMPath);
         end;

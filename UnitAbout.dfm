@@ -26,7 +26,7 @@ object AboutForm: TAboutForm
     Height = 13
     Align = alTop
     Alignment = taCenter
-    Caption = 'SVG2PNG v1.0.73'
+    Caption = 'SVG2PNG v1.1.81'
     ExplicitWidth = 86
   end
   object Label2: TLabel

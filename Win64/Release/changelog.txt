@@ -1,6 +1,7 @@
---1.1.x
+--1.1.81
 -Added: Program will save backend logs to text files
 -Fixed: Stopping didn't stop progress timer
+-Fixed: Limited ImageMagick's memory usage to 512MB
 
 --1.0.73
 -First release
